@@ -16,7 +16,7 @@ const RegisterPage: React.FC = () => {
         try {
             const response = await register({ username, password, email });
             console.log(`Registration Response: ${response}`);
-            router.push('/login');
+            router.push('/');
         } catch (error) {
             console.error(`Error registering user:${error}`)
             setError('Registration failed');
