@@ -3,7 +3,7 @@ import { Priority, Task } from "../types/tasks";
 import { TaskDTO } from "../types/tasks";
 
 // const API_URL = 'http://localhost:8081/api/tasks';
-const API_URL = `${process.env.NEXT_PUBLIC_DOCKER_TASK_MANAGER_API_URL}/tasks`
+const API_URL = `${process.env.NEXT_PUBLIC_DOCKER_TASK_MANAGER_API_URL}/api/tasks`
 
 const getToken = () => localStorage.getItem('token');
 
@@ -16,7 +16,8 @@ export const getTasks = async (): Promise<Task[]> => {
     try {
         const response = await axios.get(API_URL, {
             headers: {
-                Authorization: `Bearer ${token}`
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
             }
         });
         console.log(response.data);
@@ -40,7 +41,8 @@ export const getTasksByTitle = async (title: string): Promise<Task[]> => {
         const response = await axios.get(API_URL, {
             params: { title },
             headers: {
-                Authorization: `Bearer ${token}`
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
             }
         });
         return response.data;

@@ -3,7 +3,7 @@ import { User } from '../types/users'
 import { UserDTO } from '../types/users'
 
 
-const API_URL = `${process.env.NEXT_PUBLIC_DOCKER_TASK_MANAGER_API_URL}/users`
+const API_URL = `${process.env.NEXT_PUBLIC_DOCKER_TASK_MANAGER_API_URL}/api/users`
 
 const getToken = () => localStorage.getItem('token');
 
@@ -16,7 +16,8 @@ export const getCurrentUser = async (): Promise<User> => {
     try {
         const response = await axios.get(`${API_URL}/current`, {
             headers: {
-                Authorization: `Bearer ${token}`
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
             }
         });
         return response.data;
@@ -36,7 +37,8 @@ export const fetchUserById = async ( userId: number ): Promise<UserDTO> => {
     try {
         const response = await axios.get(`${API_URL}/${userId}`, {
             headers: {
-                Authorization: `Bearer ${token}`
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
             }
         });
         console.log(response.data);

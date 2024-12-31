@@ -1,5 +1,7 @@
 
-const RegisterPage: React.FC = () => {
+import React from 'react';
+
+const AboutPage: React.FC = () => {
     
 
     return (
@@ -11,4 +13,4 @@ const RegisterPage: React.FC = () => {
     )
 }
 
-export default RegisterPage;
+export default AboutPage;
