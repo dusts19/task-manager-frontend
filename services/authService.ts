@@ -6,12 +6,7 @@ const API_URL = `${process.env.NEXT_PUBLIC_DOCKER_TASK_MANAGER_API_URL}/api/auth
 
 export const register = async (user: { username: string; password: string; email: string }) => {
     try {
-        const response = await axios.post(`${API_URL}/register`, user, {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        }
-        );
+        const response = await axios.post(`${API_URL}/register`, user);
         return response.data;
     } catch (error) {
         console.error("Error registering user:", error);
@@ -21,11 +16,7 @@ export const register = async (user: { username: string; password: string; email
 
 export const login = async (loginRequest:{ username: string; password: string }) => {
     try{
-        const response = await axios.post(`${API_URL}/login`, loginRequest, {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
+        const response = await axios.post(`${API_URL}/login`, loginRequest);
         console.log('Backend Response:', response);
         if (response.data.token) {
             localStorage.setItem('token', response.data.token);
