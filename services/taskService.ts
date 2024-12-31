@@ -16,8 +16,8 @@ export const getTasks = async (): Promise<Task[]> => {
     try {
         const response = await axios.get(API_URL, {
             headers: {
-                Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
             }
         });
         console.log(response.data);
@@ -41,8 +41,8 @@ export const getTasksByTitle = async (title: string): Promise<Task[]> => {
         const response = await axios.get(API_URL, {
             params: { title },
             headers: {
-                Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
             }
         });
         return response.data;
