@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // const API_URL = 'http://localhost:8081/api/auth';
-// NEXT_PUBLIC_DOCKER_TASK_MANAGER_API_URL = https://todo-app-backend-31e9.onrender.com/api
+// NEXT_PUBLIC_DOCKER_TASK_MANAGER_API_URL = https://todo-app-backend-31e9.onrender.com
 const API_URL = `${process.env.NEXT_PUBLIC_DOCKER_TASK_MANAGER_API_URL}/api/auth`;
 
 export const register = async (user: { username: string; password: string; email: string }) => {
@@ -10,8 +10,7 @@ export const register = async (user: { username: string; password: string; email
             headers: {
                 'Content-Type': 'application/json'
             }
-        }
-        );
+        });
         return response.data;
     } catch (error) {
         console.error("Error registering user:", error);

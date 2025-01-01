@@ -61,6 +61,7 @@ export const createTask = async (task: TaskDTO): Promise<Task> => {
     try {
         const response = await axios.post(API_URL, task, {
             headers: {
+                'Content-Type': 'application/json',
                 Authorization: `Bearer ${token}`
             }
         });
@@ -106,7 +107,8 @@ export const updateTask = async (id: number, task: TaskDTO): Promise<Task>  => {
     try {
         const response = await axios.put(`${API_URL}/${id}`, task, {
             headers: {
-                Authorization: `Bearer ${token}`
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
             }
         });
         return response.data;
@@ -126,7 +128,8 @@ export const deleteTask = async (id: number) => {
     try{
         const response = await axios.delete(`${API_URL}/${id}`,{
             headers: {
-                Authorization: `Bearer ${token}`
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
             }
         });
         if (response.status === 204) {
@@ -148,7 +151,8 @@ export const updateTaskPriority = async (id: number, selectedPriority: Priority)
         const response = await axios.put(`${API_URL}/${id}/priority`, null, {
             params: {priority: selectedPriority},
             headers: {
-                Authorization: `Bearer ${token}`
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
             }
         });
         return response.data;

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, FC } from "react";
 import TaskForm from './_components/TaskForm';
 import TaskList from './_components/TaskList';
-import { getTasks } from "../../../services/taskService";
+import { getTasks, deleteTask } from "../../../services/taskService";
 // import { getTasks, getTasksByTitle } from "../../services/taskService";
 import { Task } from "../../../types/tasks";
 import { User } from "../../../types/users";
@@ -91,6 +91,16 @@ const TaskPage: FC = () => {
         setTasks([...tasks, savedTask]);
     }
 
+    const handleDelete = async (taskId: number) => {
+        try {
+            await deleteTask(taskId);
+            setTasks(tasks.filter(task => task.taskid !== taskId));
+        } catch (error) {
+            console.error(`Error deleting task: ${error}`);
+        }
+    };
+
+
     // const handleSearch = async (term: string) => {
     //     setSearchTerm(term);
     //     if (term){
@@ -129,7 +139,11 @@ const TaskPage: FC = () => {
                 }
             </div>
             <div className="flex justify-center mt-4 ">
-                {currentUser && <TaskList tasks={tasks} />}
+                {currentUser && <TaskList 
+                    tasks={tasks} 
+                    onDelete={handleDelete}
+                    />
+                }
             </div>
 
         </div>
