@@ -8,7 +8,7 @@ interface TaskListProps {
     onDelete: (taskId: number) => void;
 }
 
-const TaskList: FC<TaskListProps> = ({tasks, onDelete}) => {
+const TaskList: FC<TaskListProps> = ({ tasks, onDelete }) => {
 
     return (
         <div className="bg-yellow-200 w-full grid place-items-center">

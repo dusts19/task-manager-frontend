@@ -20,12 +20,31 @@ const TaskPage: FC = () => {
     // const [shouldFetchTasks, setShouldFetchTasks] = useState(false);
 
 
+    // useEffect(() => {
+    //     const fetchUserAndTasks = async () => {
+    //         try{
+    //             const user = await getCurrentUser();
+    //             setCurrentUser(user);
+    //             const data = await getTasks();
+    //             setTasks(Array.isArray(data) ? data: []);
+    //         } catch (error) {
+    //             console.error(`Error fetching user or tasks: ${error}`);
+    //             setTasks([]);
+    //         }
+    //     };
+    //     fetchUserAndTasks();
+    // }, []);
     useEffect(() => {
         const fetchUserAndTasks = async () => {
             try{
                 const user = await getCurrentUser();
+                console.log(`Raw response: ${user}`)
+
                 setCurrentUser(user);
+
                 const data = await getTasks();
+                console.log(`Fetched tasks: ${data}`)
+
                 setTasks(Array.isArray(data) ? data: []);
             } catch (error) {
                 console.error(`Error fetching user or tasks: ${error}`);
@@ -94,7 +113,7 @@ const TaskPage: FC = () => {
     const handleDelete = async (taskId: number) => {
         try {
             await deleteTask(taskId);
-            setTasks(tasks.filter(task => task.taskid !== taskId));
+            setTasks((prevtasks) => prevtasks.filter((task) => task.taskid !== taskId));
         } catch (error) {
             console.error(`Error deleting task: ${error}`);
         }
