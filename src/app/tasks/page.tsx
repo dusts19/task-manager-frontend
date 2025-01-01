@@ -139,7 +139,7 @@ const TaskPage: FC = () => {
 
     return (
         <div className="grid ">
-            {currentUser && <p className="flex justify-self-center justify-center bg-white m-2 text-2xl w-1/4 rounded-md border-gray-500 border-2 border-double">Welcome {currentUser.username}!</p>}
+            {currentUser && <p className="flex justify-self-center justify-center bg-white m-2 text-2xl w-1/4 max-h-10 pt-1 rounded-md border-gray-500 border-2 border-double">Welcome {currentUser.username}!</p>}
 
             {/* <TaskSearch onSearch={handleSearch} />
             {searchTerm && tasks.map(task => (
@@ -148,7 +148,7 @@ const TaskPage: FC = () => {
             {/* <TaskForm onSave={handleSave} /> */}
             
 
-            <div className="flex justify-center">
+            <div className="flex justify-center mb-16">
                 {currentUser && 
                     <TaskForm 
                         onSave={handleSave} 
@@ -157,7 +157,7 @@ const TaskPage: FC = () => {
                     />
                 }
             </div>
-            <div className="flex justify-center mt-4 ">
+            <div className="flex mt-4 ">
                 {currentUser && <TaskList 
                     tasks={tasks} 
                     onDelete={handleDelete}

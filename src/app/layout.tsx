@@ -28,7 +28,7 @@ export default function RootLayout({
     <html lang="en">
       
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-custom-bg`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-custom-bg w-screen h-lvh`}
       > 
         <Header title="The Daily Director!"/>
         {children}

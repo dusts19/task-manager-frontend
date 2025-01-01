@@ -46,7 +46,7 @@ export default function Home() {
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen pb-20 gap-4 sm:pb-20 sm:px-20 sm:pt-10 font-[family-name:var(--font-geist-sans)] border-black border-1">
 
-      <main className="flex flex-col gap-8 row-start-2 items-center border-black border-2 w-fit h-full bg-slate-100 rounded-lg">
+      <main className="flex flex-col gap-8 row-start-2 items-center border-black border-2 w-fit h-full lg:max-h-min lg:pt-4 lg:pb-4 bg-slate-100 rounded-lg">
         <div className="">
 
           {
