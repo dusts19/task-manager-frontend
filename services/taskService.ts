@@ -20,7 +20,7 @@ export const getTasks = async (): Promise<Task[]> => {
                 Authorization: `Bearer ${token}`
             }
         });
-        console.log(response.data);
+        console.log(`getTasks: ${response.data}`);
         return response.data;
     } catch (error) {
         console.log('Error creating task:', error);
