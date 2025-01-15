@@ -5,9 +5,10 @@ import React, { useState } from 'react';
 
 interface LoginProps {
     handleLogin: (username: string, password: string) => void;
+    errorMessage: string | null;
 }
 
-const LoginPage: React.FC<LoginProps> = ({handleLogin}) => {
+const LoginPage: React.FC<LoginProps> = ({handleLogin, errorMessage}) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     // const navigate = useNavigate();
@@ -20,7 +21,6 @@ const LoginPage: React.FC<LoginProps> = ({handleLogin}) => {
 
     return (
         <div className="grid p-2 gap-2">
-            {/* <h1 className="justify-self-center">Login</h1> */}
             <form onSubmit={onSubmit} className="grid p-2 gap-2">
                 <input
                     type="text"
@@ -43,6 +43,10 @@ const LoginPage: React.FC<LoginProps> = ({handleLogin}) => {
 
                 <button type="submit" className="border-black border-2 rounded-md justify-self-center px-2"> Login</button>
 
+
+                {errorMessage && (
+                    <div className="text-red-500 mt-4">{errorMessage}</div>
+                )}
             </form>
         </div>
     );

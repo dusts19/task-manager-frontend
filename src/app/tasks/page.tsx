@@ -3,111 +3,80 @@
 import React, { useState, useEffect, FC } from "react";
 import TaskForm from './_components/TaskForm';
 import TaskList from './_components/TaskList';
-import { getTasks, deleteTask } from "../../../services/taskService";
-// import { getTasks, getTasksByTitle } from "../../services/taskService";
-import { Task } from "../../../types/tasks";
+import { getTasks, updateTask, deleteTask } from "../../../services/taskService";
+import { TaskDTO } from "../../../types/tasks";
 import { User } from "../../../types/users";
 // import TaskSearch from "../TaskSearch/TaskSearch";
-// import {jwtDecode} from 'jwt-decode';
 import { getCurrentUser } from "../../../services/userService";
 
-// const getToken = () => localStorage.getItem('token');
 
 const TaskPage: FC = () => {
-    const [tasks, setTasks] = useState<Task[]>([]);
+    const [tasks, setTasks] = useState<TaskDTO[]>([]);
     const [currentUser, setCurrentUser] = useState<User | null>(null);
+    const [editingTask, setEditingTask] = useState<TaskDTO | null>(null);
     // const [searchTerm, setSearchTerm] = useState('');
-    // const [shouldFetchTasks, setShouldFetchTasks] = useState(false);
 
 
-    // useEffect(() => {
-    //     const fetchUserAndTasks = async () => {
-    //         try{
-    //             const user = await getCurrentUser();
-    //             setCurrentUser(user);
-    //             const data = await getTasks();
-    //             setTasks(Array.isArray(data) ? data: []);
-    //         } catch (error) {
-    //             console.error(`Error fetching user or tasks: ${error}`);
-    //             setTasks([]);
-    //         }
-    //     };
-    //     fetchUserAndTasks();
-    // }, []);
     useEffect(() => {
         const fetchUserAndTasks = async () => {
             try{
                 const user = await getCurrentUser();
-                console.log(`Raw response: ${user}`)
 
                 setCurrentUser(user);
 
                 const data = await getTasks();
-                console.log(`Fetched tasks: ${data}`)
 
                 setTasks(Array.isArray(data) ? data: []);
             } catch (error) {
-                console.error(`Error fetching user or tasks: ${error}`);
+                console.error("Error fetching user or tasks:", error);
                 setTasks([]);
             }
         };
         fetchUserAndTasks();
     }, []);
 
-    // useEffect(() => {
-    //     const token = getToken();
-        
-    //     if (token) {
-    //         const decodedUser: User = jwtDecode(token);
-    //         setCurrentUser(decodedUser);
-    //         setShouldFetchTasks(true);
-    //     }
-    // }, []);
-    // useEffect(() => {
-    //     if (shouldFetchTasks) {
-    //         const fetchTasks = async () => {
-    //             try {
-    //                 const data = await getTasks();
-    //                 console.log("Fetched tasks:", data);
-    //                 if (Array.isArray(data)) {
-    //                     setTasks(data);
-    //                 } else {
-    //                     setTasks([]);
-    //                 }
-    //             } catch (error) {
-    //                 console.error("Error fetching tasks:", error);
-    //                 setTasks([]);
-    //             }
-    //         };
-    //         fetchTasks();
-    //         setShouldFetchTasks(false);
-    //     }
-    // }, [shouldFetchTasks]);
 
 
 
 
-    // useEffect(() => {
-    //     const token = getToken();
 
-    //     if (token) {
-    //         const decodedUser: User = jwtDecode(token);
-    //         setCurrentUser(decodedUser);
-    //     }
-    //     const fetchTasks = async () => {
-    //         try {
-    //             const data = await getTasks();
-    //             setTasks(data)
-    //         } catch (error) {
-    //             console.error("Error fetching tasks:", error);
-    //             setTasks([]);
-    //         }
-    //     };
-    //         fetchTasks();
-    // }, []);
 
-    const handleSave = (savedTask: Task) => {
-        setTasks([...tasks, savedTask]);
+    const handleSave = async () => {
+        try{
+            const data = await getTasks();
+            setTasks(data)
+        }catch (error) {
+            console.error("Failed to fetch tasks:", error);
+        }
+    }
+
+    // const handleSave = (savedTask: TaskDTO) => {
+    //     setTasks([...tasks, savedTask]);
+    // }
+
+
+    const handleUpdate = async ( updatedTask: TaskDTO ) => {
+        console.log("Updating task from taskpage:", updatedTask.taskid);
+        console.log("Updating Task object from taskpage:", updatedTask);
+        try {
+            console.log("updatedTask: ", updatedTask.userid)
+            if (!updatedTask.userid) {
+                throw new Error('User id is missing in the updated task.');
+            }
+            const updated = await updateTask(updatedTask.taskid, updatedTask);
+
+
+
+            setTasks((prevTasks) => prevTasks.map((task) => 
+                (task.taskid === updated.taskid ? updated : task)
+            ));
+
+
+            setEditingTask(null);
+        } catch (error) {
+            console.error(`Error updating task: ${error}`)
+        }
+        // setTasks([...task])
     }
 
     const handleDelete = async (taskId: number) => {
@@ -135,10 +104,11 @@ const TaskPage: FC = () => {
         
     // }
 
-    console.log('Fetched tasks in:', tasks);
+    console.log("Fetched tasks in:", tasks);
 
     return (
         <div className="grid ">
+            
             {currentUser && <p className="flex justify-self-center justify-center bg-white m-2 text-2xl w-1/4 max-h-10 pt-1 rounded-md border-gray-500 border-2 border-double">Welcome {currentUser.username}!</p>}
 
             {/* <TaskSearch onSearch={handleSearch} />
@@ -153,14 +123,16 @@ const TaskPage: FC = () => {
                     <TaskForm 
                         onSave={handleSave} 
                         currentUser={currentUser}
-                        
+                        task={editingTask}
+                        onUpdate={handleUpdate}
                     />
                 }
             </div>
             <div className="flex mt-4 ">
                 {currentUser && <TaskList 
-                    tasks={tasks} 
-                    onDelete={handleDelete}
+                    tasks={ tasks } 
+                    onDelete={ handleDelete }
+                    onEdit={ (task: TaskDTO) => setEditingTask(task) }
                     />
                 }
             </div>

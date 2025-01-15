@@ -1,25 +1,37 @@
 'use client'
-// import React, { useState, useEffect } from 'react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+// import React, { useState } from 'react';
 
-import { createTask } from '../../../../services/taskService';
+import { createTask, updateTask } from '../../../../services/taskService';
 import { Task, Priority, TaskDTO } from "../../../../types/tasks";
 import { User } from "../../../../types/users";
+
 // import { fetchUserById, getCurrentUser } from '../../../../services/userService';
 import { fetchUserById } from '../../../../services/userService';
 
 
 interface TaskFormProps {
-    onSave: (task: Task) => void;
+    onSave: (task: TaskDTO) => void;
+    onUpdate: (task: TaskDTO) => void;
     currentUser: User;
-    task?: Task;
+    task?: TaskDTO | null;
 }
 
 
-const TaskForm: React.FC<TaskFormProps> = ({ onSave, currentUser, task }) => {
+const TaskForm: React.FC<TaskFormProps> = ({ onSave, onUpdate, currentUser, task }) => {
     const [taskTitle, setTaskTitle] = useState(task?.tasktitle || '');
     const [taskDescription, setTaskDescription] = useState(task?.taskdescription || '');
     const [taskPriority, setTaskPriority] = useState<Priority>(task?.taskpriority || 'LOW');
+    const [taskCompleted, setTaskCompleted] = useState(task?.taskcompleted || false);
+
+    useEffect(() => {
+        if (task) {
+            setTaskTitle(task.tasktitle);
+            setTaskDescription(task.taskdescription);
+            setTaskPriority(task.taskpriority)
+            setTaskCompleted(task.taskcompleted)
+        }
+    }, [task])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -38,23 +50,35 @@ const TaskForm: React.FC<TaskFormProps> = ({ onSave, currentUser, task }) => {
         const newTask: Omit<Task, 'taskid' | 'user'> = { 
             tasktitle: taskTitle, 
             taskdescription: taskDescription, 
-            taskcompleted: task?.taskcompleted || false, 
             taskpriority: taskPriority,
+            taskcompleted: task?.taskcompleted || false, 
         };
 
         const payload: TaskDTO = {
             ...newTask,
             userid: persistedUser.id,
+            taskid: task?.taskid || 0,
         };
 
 
         let savedTask;
         try {
-            savedTask =await createTask(payload);
-            onSave(savedTask);
+            if (task) {
+                console.log('updating task')
+                savedTask = await updateTask(task.taskid, payload);
+                onUpdate(payload);
+            } else {
+                console.log('creating task', payload);
+                savedTask = await createTask(payload);
+                console.log('created task after backend in taskForm', savedTask)
+                onSave(savedTask);
+            }
+
             setTaskTitle('');
             setTaskDescription('');
             setTaskPriority("LOW")
+            setTaskCompleted(false);
+
         } catch (error) {
             console.error('Error creating task:', error);
             alert('Failed to create task. Please check the console for more details.')
@@ -95,7 +119,21 @@ const TaskForm: React.FC<TaskFormProps> = ({ onSave, currentUser, task }) => {
                         <option value="HIGH">High</option>
                     </select>
                 </div>
-                <button className=" border-black border-2 rounded-md p-1 mx-36 bg-red-500 hover:text-white"type="submit">{task ? 'Update Task' : 'Add Task'}</button>
+                <div className="">
+                    <label className="">Completed</label>
+                    <input
+                        type="checkbox"
+                        checked={taskCompleted}
+                        onChange={(e) => setTaskCompleted(e.target.checked)}
+                        className=" border-2 rounded-md border-black"
+                    />
+                </div>
+                <button 
+                    className=" border-black border-2 rounded-md p-1 mx-36 bg-red-500 hover:text-white"
+                    type="submit"
+                >
+                    {task ? 'Update Task' : 'Add Task'}
+                </button>
             </form>
         </div>
     );

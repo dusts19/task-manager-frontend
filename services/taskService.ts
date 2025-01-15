@@ -7,7 +7,7 @@ const API_URL = `${process.env.NEXT_PUBLIC_DOCKER_TASK_MANAGER_API_URL}/api/task
 
 const getToken = () => localStorage.getItem('token');
 
-export const getTasks = async (): Promise<Task[]> => {
+export const getTasks = async (): Promise<TaskDTO[]> => {
     const token = getToken();
 
     if (!token) {
@@ -52,7 +52,7 @@ export const getTasksByTitle = async (title: string): Promise<Task[]> => {
     }
 }
 
-export const createTask = async (task: TaskDTO): Promise<Task> => {
+export const createTask = async (task: TaskDTO): Promise<TaskDTO> => {
     const token = getToken();
     
     if (!token) {
@@ -99,7 +99,7 @@ export const createTask = async (task: TaskDTO): Promise<Task> => {
 //     // return response.data;
 // }
 
-export const updateTask = async (id: number, task: TaskDTO): Promise<Task>  => {
+export const updateTask = async (id: number, task: TaskDTO): Promise<TaskDTO>  => {
     const token = getToken();
     if (!token) {
         throw new Error('No token found');

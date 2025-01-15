@@ -14,6 +14,7 @@ export type Priority = 'LOW' | 'MEDIUM' | 'HIGH';
 
 
 export interface TaskDTO {
+    taskid: number,
     tasktitle: string;
     taskdescription: string;
     taskcompleted: boolean;
