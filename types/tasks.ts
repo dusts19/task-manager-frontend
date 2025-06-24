@@ -6,7 +6,10 @@ export interface Task {
     tasktitle: string;
     taskdescription: string;
     taskpriority: Priority;
+    taskcategory: string;
     taskcompleted: boolean;
+    createdDate: string;
+    dueDate: string
     user: User;
 };
 
@@ -17,7 +20,10 @@ export interface TaskDTO {
     taskid: number,
     tasktitle: string;
     taskdescription: string;
-    taskcompleted: boolean;
     taskpriority: Priority;
+    taskcategory: string;
+    taskcompleted: boolean;
+    createdDate: string;
+    dueDate: string
     userid: number;
 }

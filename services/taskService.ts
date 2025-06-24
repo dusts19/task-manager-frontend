@@ -2,7 +2,6 @@ import axios from 'axios'
 import { Priority, Task } from "../types/tasks";
 import { TaskDTO } from "../types/tasks";
 
-// const API_URL = 'http://localhost:8081/api/tasks';
 const API_URL = `${process.env.NEXT_PUBLIC_DOCKER_TASK_MANAGER_API_URL}/api/tasks`
 
 const getToken = () => localStorage.getItem('token');
@@ -20,14 +19,11 @@ export const getTasks = async (): Promise<TaskDTO[]> => {
                 Authorization: `Bearer ${token}`
             }
         });
-        console.log(`getTasks: ${response.data.tasks}`);
         return response.data;
     } catch (error) {
-        console.log('Error creating task:', error);
+        console.error('Error creating task:', error);
         return [];
     }
-    // console.log(response.data);
-    // return response.data;
 }
 
 
@@ -47,7 +43,7 @@ export const getTasksByTitle = async (title: string): Promise<Task[]> => {
         });
         return response.data;
     } catch (error) {
-        console.log('Error searching for tasks');
+        console.error('Error searching for tasks');
         throw error;
     }
 }
@@ -65,47 +61,24 @@ export const createTask = async (task: TaskDTO): Promise<TaskDTO> => {
                 Authorization: `Bearer ${token}`
             }
         });
-        // if (response.status === 201) {
-        //     console.log('Task created successfully:', response.data);
-        //     return response.data;
-        // }
         return response.data;
     } catch (error) {
-        console.log('Error creating task:', error);
+        console.error('Error creating task:', error);
         throw error;
     }
-    // return response.data;
 }
 
-// export const createTask = async (task: any) => {
-//     const token = getToken();
-    
-//     if (!token) {
-//         throw new Error('No token found');
-//     }
-//     try {
-//         const response = await axios.post(API_URL, task, {
-//             headers: {
-//                 Authorization: `Bearer ${token}`
-//             }
-//         });
-//         if (response.status === 201) {
-//             console.log('Task created successfully:', response.data);
-//             return response.data;
-//         }
-//     } catch (error) {
-//         console.log('Error creating task:', error);
-//     }
-//     // return response.data;
-// }
 
-export const updateTask = async (id: number, task: TaskDTO): Promise<TaskDTO>  => {
+export const updateTask = async (task: TaskDTO): Promise<TaskDTO>  => {
     const token = getToken();
     if (!token) {
         throw new Error('No token found');
     }
+    if (!task.taskid) {
+        throw new Error('Task ID is required to update the task');
+    }
     try {
-        const response = await axios.put(`${API_URL}/${id}`, task, {
+        const response = await axios.put(`${API_URL}/${task.taskid}`, task, {
             headers: {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json',
@@ -113,13 +86,11 @@ export const updateTask = async (id: number, task: TaskDTO): Promise<TaskDTO>  =
         });
         return response.data;
     } catch (error) {
-        console.log('Error updating task:', error);
+        console.error('Error updating task:', error);
         throw error;
     }
-    // return response.data;
 }
 
-// deleteTask
 export const deleteTask = async (id: number) => {
     const token = getToken();
     if (!token) {
@@ -136,10 +107,8 @@ export const deleteTask = async (id: number) => {
             console.log('Task deleted successfully');
         }
     } catch (error) {
-        console.log('Error deleting task:', error);
+        console.error('Error deleting task:', error);
     }
-        
-    // return response.data;
 }
 
 export const updateTaskPriority = async (id: number, selectedPriority: Priority) => {
@@ -157,7 +126,7 @@ export const updateTaskPriority = async (id: number, selectedPriority: Priority)
         });
         return response.data;
     } catch (error) {
-        console.log('Error updating task priority:', error);
+        console.error('Error updating task priority:', error);
     }
 }
 
