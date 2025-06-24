@@ -104,7 +104,10 @@ const TaskPage: FC = () => {
                                         setEditingTask(null);
                                         setView("all");
                                     }}
-                                    onCancelEdit={() => setEditingTask(null)}
+                                    onCancelEdit={() => {
+                                        setEditingTask(null)
+                                        setView("all");
+                                    }}
                                     currentUser={user}
                                     task={editingTask}
                                 />
