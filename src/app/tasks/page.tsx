@@ -1,143 +1,239 @@
 "use client"
 
-import React, { useState, useEffect, FC } from "react";
+import React, { FC, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import TaskForm from './_components/TaskForm';
 import TaskList from './_components/TaskList';
-import { getTasks, updateTask, deleteTask } from "../../../services/taskService";
 import { TaskDTO } from "../../../types/tasks";
-import { User } from "../../../types/users";
-// import TaskSearch from "../TaskSearch/TaskSearch";
-import { getCurrentUser } from "../../../services/userService";
+import { useTaskView } from "../../../context/TaskViewContext";
+import { useEditingTask } from "../../../context/EditingTaskContext";
+import { useTask } from "../../../context/TaskContext";;
+import { useUser } from "../../../context/UserContext";
 
 
 const TaskPage: FC = () => {
-    const [tasks, setTasks] = useState<TaskDTO[]>([]);
-    const [currentUser, setCurrentUser] = useState<User | null>(null);
-    const [editingTask, setEditingTask] = useState<TaskDTO | null>(null);
-    // const [searchTerm, setSearchTerm] = useState('');
+    const { tasks, refreshTasks, updateTask, deleteTask } = useTask();
+    const {user} = useUser();
+    const { view, setView } = useTaskView();
+    const { editingTask, setEditingTask } = useEditingTask();
 
+    const filteredTasks = useMemo(() => {
+        if (view === 'all') {
+            return tasks
+        }
+        if (view.startsWith("category:")) {
+            const category = view.split(":")[1];
+            return tasks.filter(task => task.taskcategory === category);
+        }
 
-    useEffect(() => {
-        const fetchUserAndTasks = async () => {
-            try{
-                const user = await getCurrentUser();
-
-                setCurrentUser(user);
-
-                const data = await getTasks();
-
-                setTasks(Array.isArray(data) ? data: []);
-            } catch (error) {
-                console.error("Error fetching user or tasks:", error);
-                setTasks([]);
-            }
-        };
-        fetchUserAndTasks();
-    }, []);
-
-
-
-
-
-
+        switch (view) {
+            case "completed":
+                return tasks.filter(task => task.taskcompleted);
+            case "priority":
+                return [...tasks].sort((a, b) => {
+                    const order = { LOW: 1, MEDIUM: 2, HIGH: 3 };
+                    return order[b.taskpriority] - order[a.taskpriority];
+                });
+            case "category":
+                return [...tasks].sort((a, b) => a.taskcategory.localeCompare(b.taskcategory));
+            case "date":
+                return [...tasks].sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
+            // case "newest":
+            //     return [...tasks].sort((a, b) => new Date(b.createdDate).getTime() - new Date(b.createdDate).getTime());
+            default:
+                return tasks;
+        }
+    }, [view, tasks])
 
     const handleSave = async () => {
         try{
-            const data = await getTasks();
-            setTasks(data)
+            await refreshTasks();
         }catch (error) {
-            console.error("Failed to fetch tasks:", error);
+            console.error("Failed to save task:", error);
         }
     }
 
-    // const handleSave = (savedTask: TaskDTO) => {
-    //     setTasks([...tasks, savedTask]);
-    // }
-
-
     const handleUpdate = async ( updatedTask: TaskDTO ) => {
-        console.log("Updating task from taskpage:", updatedTask.taskid);
-        console.log("Updating Task object from taskpage:", updatedTask);
         try {
-            console.log("updatedTask: ", updatedTask.userid)
-            if (!updatedTask.userid) {
-                throw new Error('User id is missing in the updated task.');
-            }
-            const updated = await updateTask(updatedTask.taskid, updatedTask);
+            await updateTask(updatedTask);
 
-
-
-            setTasks((prevTasks) => prevTasks.map((task) => 
-                (task.taskid === updated.taskid ? updated : task)
-            ));
-
-
-            setEditingTask(null);
         } catch (error) {
             console.error(`Error updating task: ${error}`)
         }
-        // setTasks([...task])
     }
 
     const handleDelete = async (taskId: number) => {
         try {
             await deleteTask(taskId);
-            setTasks((prevtasks) => prevtasks.filter((task) => task.taskid !== taskId));
         } catch (error) {
             console.error(`Error deleting task: ${error}`);
         }
     };
 
 
-    // const handleSearch = async (term: string) => {
-    //     setSearchTerm(term);
-    //     if (term){
-    //         try {
-    //             const userTasks = await getTasksByTitle(term);
-    //             setTasks(userTasks);
-    //         } catch (error) {
-    //             console.error("Error searching tasks:", error);
-    //         }
-    //     } else {
-    //         setTasks([]);
-    //     }
-        
-    // }
 
     console.log("Fetched tasks in:", tasks);
 
     return (
-        <div className="grid ">
+        <div className="flex h-full pb-12 overflow-y-auto">
+            <main className="flex-1 ">
             
-            {currentUser && <p className="flex justify-self-center justify-center bg-white m-2 text-2xl w-1/4 max-h-10 pt-1 rounded-md border-gray-500 border-2 border-double">Welcome {currentUser.username}!</p>}
+                {/* <TaskSearch onSearch={handleSearch} />
+                {searchTerm && tasks.map(task => (
+                    <div key={task.taskid}>{task.tasktitle}</div>
+                ))} */}
+                {/* <TaskForm onSave={handleSave} /> */}
+                
+                <AnimatePresence mode="wait">
+                    {(view === "add" || editingTask) && (
+                        <motion.div
+                            key="form"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                        >
+                            {user && 
+                                <TaskForm 
+                                    onSave={async () => {
+                                        handleSave();
+                                        setEditingTask(null);
+                                        setView("all");
+                                    }}
+                                    onUpdate={async (task) => {
+                                        await handleUpdate(task);
+                                        setEditingTask(null);
+                                        setView("all");
+                                    }}
+                                    onCancelEdit={() => setEditingTask(null)}
+                                    currentUser={user}
+                                    task={editingTask}
+                                />
+                            }
+                        </motion.div>
+                    )}
+                    {view === "all" && (
+                        <motion.div
+                            key="all"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                        >
+                            {user && 
+                                <TaskList 
+                                    tasks={ tasks }
+                                    view={ view }
+                                    onDelete={ handleDelete }
+                                    onEdit={ (task: TaskDTO) => {
+                                        setEditingTask(task);
+                                        setView("add");
+                                    }}
+                                    />
+                            }
+                        </motion.div>
+                    )}
+                    
+                    {view === "priority" && (
+                        <motion.div
+                            key="priority"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                        >
+                            {user && 
+                                <TaskList 
+                                    tasks={ filteredTasks }
+                                    view={ view }
+                                    onDelete={ handleDelete }
+                                    onEdit={ (task: TaskDTO) => {
+                                        setEditingTask(task);
+                                        setView("add");
+                                    }}
+                                    />
+                            }
+                        </motion.div>
+                    )}
+                    {view === "category" && (
+                        <motion.div
+                            key="category"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                        >
+                            {user && 
+                                <TaskList 
+                                    tasks={ filteredTasks }
+                                    view={ view }
+                                    onDelete={ handleDelete }
+                                    onEdit={ (task: TaskDTO) => setEditingTask(task) }
+                                    />
+                            }
+                        </motion.div>
+                    )}
+                    {view.startsWith("category:") && (
+                        <motion.div
+                            key={view}
+                            initial={{opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                        >
+                            {user &&
+                                <TaskList 
+                                    tasks={ filteredTasks } 
+                                    view={ view }
+                                    onDelete={ handleDelete }
+                                    onEdit={ (task: TaskDTO) => {
+                                        setEditingTask(task);
+                                        setView("add");
+                                    }}
+                                    />
+                            }
+                        </motion.div>
+                    )}
+                    {view === "date" && (
+                        <motion.div
+                            key="date"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                        >
+                            {user && 
+                                <TaskList 
+                                    tasks={ filteredTasks } 
+                                    view={ view }
+                                    onDelete={ handleDelete }
+                                    onEdit={ (task: TaskDTO) => {
+                                        setEditingTask(task);
+                                        setView("add");
+                                    }}
+                                    />
+                            }
+                        </motion.div>
+                    )}
+                    {view === "completed" && (
+                        <motion.div
+                            key="completed"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                        >
+                            {user && 
+                                <TaskList 
+                                    tasks={ filteredTasks } 
+                                    view={ view }
+                                    onDelete={ handleDelete }
+                                    onEdit={ (task: TaskDTO) => {
+                                        setEditingTask(task);
+                                        setView("add");
+                                    }}
+                                    />
+                            }
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
-            {/* <TaskSearch onSearch={handleSearch} />
-            {searchTerm && tasks.map(task => (
-                <div key={task.taskid}>{task.tasktitle}</div>
-            ))} */}
-            {/* <TaskForm onSave={handleSave} /> */}
-            
-
-            <div className="flex justify-center mb-16">
-                {currentUser && 
-                    <TaskForm 
-                        onSave={handleSave} 
-                        currentUser={currentUser}
-                        task={editingTask}
-                        onUpdate={handleUpdate}
-                    />
-                }
-            </div>
-            <div className="flex mt-4 ">
-                {currentUser && <TaskList 
-                    tasks={ tasks } 
-                    onDelete={ handleDelete }
-                    onEdit={ (task: TaskDTO) => setEditingTask(task) }
-                    />
-                }
-            </div>
-
+            </main>
         </div>
+        
     );
 }
 

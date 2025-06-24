@@ -1,34 +1,33 @@
 "use client"
 
 // import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation';
 import Login from './components/Login';
 import Register from './components/Register';
-import { login, register} from '../../services/authService'
+import {  register} from '../../services/authService'
 import { AxiosError } from 'axios';
+import { useUser } from '../../context/UserContext';
 
 export default function Home() {
   const [isLogin, setIsLogin] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const router = useRouter();
+  const { user, loginAndSetUser } = useUser();
 
+
+  useEffect(() => {
+    if (user && user.username === 'Guest') {
+      router.push('/tasks');
+    }
+  }, [user, router]);
 
   const handleLogin = async (username: string, password: string ) => {
       try {
-        const token = await login({ username, password });
-        console.log(`Login successful: ${token}`)
-        // redirect('/home')
-        router.push('/tasks');
+        await loginAndSetUser({ username, password });
+        // console.log(`Login successful: ${token}`)
         setErrorMessage(null);
-        // const token = await login({ username, password });
-        // // console.log('JWT Token:', token);
-        // if (token){
-        //     localStorage.setItem('token', token);
-        //     // navigate('/tasks');
-        // } else {
-        //     setError('Invalid credentials');
-        // }
+        router.push('/tasks');
       } catch (error: unknown) {
         console.error(`Login error: ${error}`)
 
@@ -46,7 +45,7 @@ export default function Home() {
               setErrorMessage(`Error: ${error.response.status} - ${error.response.statusText || "No status text available"}`);
             }
           } else if (error.request) {
-            setErrorMessage("Network error. Pleaes check your connection.");
+            setErrorMessage("Network error. Please check your connection.");
           } else {
             setErrorMessage("An unexpected error occurred.");
           }
@@ -62,8 +61,8 @@ export default function Home() {
       try {
           const response = await register({ username, password, email });
           console.log(`Registration Response: ${response}`);
-          router.push('/');
-          setErrorMessage(null);
+          setErrorMessage("Account created successfully. Please log in.");
+          setIsLogin(true);
       } catch (error) {
           console.error(`Error registering user:${error}`);
           setErrorMessage("An error occurred during registration. Please try again.")
@@ -72,32 +71,42 @@ export default function Home() {
 
 
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen pb-20 gap-4 sm:pb-20 sm:px-20 sm:pt-10 font-[family-name:var(--font-geist-sans)] border-black border-1">
+    <div className="items-center justify-items-center w-full min-h-screen pb-20 gap-4 pt-16 sm:pb-16 sm:px-20 lg:pt-10 xl:pt-10 2xl-wide:pt-20 
+                    font-[family-name:var(--font-geist-sans)] border-black border-1 dark:bg-[#121212] dark:text-[#E0E0E0]
+                    dark:border-[#2C2C2C]">
 
-      <main className="flex flex-col gap-8 row-start-2 items-center border-black border-2 w-fit h-full lg:max-h-min lg:pt-4 lg:pb-4 bg-slate-100 rounded-lg">
+      <main className="flex flex-col gap-8 row-start-2 items-center border-black border-2  
+                      w-fit max-w-md h-fit mx-auto py-3 px-2 lg:max-h-min lg:pt-4 lg:pb-4 bg-slate-100 rounded-lg
+                      dark:bg-[#1E1E1E] dark:border-[#2C2C2C]">
         <div className="">
 
-          {isLogin ? 
-            <p className="justify-self-center">Login</p> : 
-            <p className="justify-self-center">Register</p>
-          }
+          <div className="justify-self-center ">
+            {isLogin ? 
+              <p className="">Login</p> : 
+              <p className="">Register</p>
+            }
+          </div>
+            
             
           <div className="h-56">
               {isLogin ? 
               <Login handleLogin={handleLogin} errorMessage={errorMessage}/> : 
-              <Register handleRegister={handleRegister} />
+              <Register handleRegister={handleRegister} errorMessage={errorMessage}/>
               }
           </div>
         </div>
         
 
-        <div className="flex justify-around w-1/4 align-bottom pb-2">
+        <div className="flex justify-around align-bottom pb-2">
 
           {isLogin ? 
           <div className="justify-items-center">
             <p>No account?</p>
             <button 
-              onClick={() => setIsLogin(false)}
+              onClick={() => {
+                setIsLogin(false);
+                setErrorMessage(null);
+              }}
               className="text-red-500 underline"
             >
               Register
@@ -106,7 +115,10 @@ export default function Home() {
           <div className="justify-items-center">
             <p>Have an account? </p>
             <button 
-              onClick={() => setIsLogin(true)}
+              onClick={() => {
+                setIsLogin(true);
+                setErrorMessage(null);
+              }}
               className="text-red-500 underline "
             >
               Login
