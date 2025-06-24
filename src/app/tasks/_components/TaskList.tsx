@@ -1,7 +1,5 @@
-// import React, { FC, useState, useEffect } from 'react';
 import React, { FC, useState } from 'react';
 import { TaskDTO } from '../../../../types/tasks'
-// import {getTasks} from '../../services/taskService'
 
 interface TaskListProps {
     tasks: TaskDTO[];
