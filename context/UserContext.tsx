@@ -29,7 +29,7 @@ export const UserProvider = ({ children } : { children: React.ReactNode }) => {
     }
 
     useEffect(() => {
-        getCurrentUser().then(setUser).catch(() => setUser(null));
+        getCurrentUser().then(setUser);
     }, []);
 
     return (
