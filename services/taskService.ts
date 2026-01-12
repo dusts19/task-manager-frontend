@@ -78,7 +78,7 @@ export const updateTask = async (task: TaskDTO): Promise<TaskDTO>  => {
         throw new Error('Task ID is required to update the task');
     }
     try {
-        const response = await axios.put(`${API_URL}/${task.taskid}`, task, {
+        const response = await axios.patch(`${API_URL}/${task.taskid}`, task, {
             headers: {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json',
@@ -117,7 +117,7 @@ export const updateTaskPriority = async (id: number, selectedPriority: Priority)
         throw new Error('No token found');
     }
     try {
-        const response = await axios.put(`${API_URL}/${id}/priority`, null, {
+        const response = await axios.patch(`${API_URL}/${id}/priority`, null, {
             params: {priority: selectedPriority},
             headers: {
                 Authorization: `Bearer ${token}`,
